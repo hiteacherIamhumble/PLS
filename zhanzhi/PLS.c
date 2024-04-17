@@ -96,37 +96,76 @@ void invoke(const char *str);
 int dateDiff(const struct tm *startDate, const struct tm *endDate);
 int allocate(int, int, int, int, int[3]);
 
-int isRemaining(int a, int b) {
-    if (a = 0) return 0;
-    if (a < 0) return b;
-    return -1;
+int kernel(int Q, int Rx, int Ry, int Rz, int alloc[3]) {
+    
+    int delta = Q;
+
+    for (int i = 0; i <= Rx; ++i) {
+        for (int j = 0; j <= Ry; ++j) {
+            for (int k = 0; k <= Rz; ++k) {
+                int remain = i * 300 + j * 400 + k * 500 - Q;
+                if (remain >= 0 && remain <= delta) {
+                    alloc[0] = i;
+                    alloc[1] = j;
+                    alloc[2] = k;
+                    delta = remain;
+                }
+            }
+        }
+    }
+
+    int re = alloc[0] * 300 + alloc[1] * 400 + alloc[2] * 500 - Q;
+    //find which plant where the vacancy from
+    if (re == 0) {
+        return 0;
+    } else if (re >= 400 && alloc[2] > 0) {
+        return 3;
+    } else if (re >=300 && alloc[1] > 0) {
+        return 2;
+    } else if (re >= 300 && alloc[2] > 0) {
+        return 3;
+    } else if (alloc[0] > 0) {
+        return 1;
+    } else if (alloc[1] > 0) {
+        return 2;
+    } else if (alloc[2] > 0) {
+        return 3;
+    } else {
+        return -1;
+    }
 }
 
-int MinThree(int a, int b, int c) {
-    int min = a;
-    if (b < min) min = b;
-    if (c < min) min = c;
-    return min;
-}
+// int isRemaining(int a, int b) {
+//     if (a == 0) return 0;
+//     if (a < 0) return b;
+//     return -1;
+// }
 
-int MinTwo(int a, int b) {
-    int min = a;
-    if (b < min) min = b;
-    return min;
-}
+// int MinThree(int a, int b, int c) {
+//     int min = a;
+//     if (b < min) min = b;
+//     if (c < min) min = c;
+//     return min;
+// }
 
-int MaxThree(int a, int b, int c) {
-    int max = a, ind = 0;
-    if (b > max) max = b; ind = 1;
-    if (c > max) max = c; ind = 2;
-    return ind;
-}
+// int MinTwo(int a, int b) {
+//     int min = a;
+//     if (b < min) min = b;
+//     return min;
+// }
 
-int MaxTwo(int a, int b) {
-    int max = a, ind = 0;
-    if (b > max) max = b; ind = 1;
-    return ind;
-}
+// int MaxThree(int a, int b, int c) {
+//     int max = a, ind = 0;
+//     if (b > max) {max = b; ind = 1;}
+//     if (c > max) {max = c; ind = 2;}
+//     return ind;
+// }
+
+// int MaxTwo(int a, int b) {
+//     int max = a, ind = 0;
+//     if (b > max) {max = b; ind = 1;}
+//     return ind;
+// }
 
 void promptEnter()
 {
@@ -160,7 +199,6 @@ const struct tm str2Date(const char *str)
     return res;
 }
 
-/*@para: 2 date; @return: their differnce*/
 int dateDiff(const struct tm *startDate, const struct tm *endDate)
 {
     time_t start = mktime(startDate);
@@ -174,157 +212,178 @@ int dateDiff(const struct tm *startDate, const struct tm *endDate)
     return (int)diff / (60 * 60 * 24);
 }
 
-int allocate(int Quantity, int RT1, int RT2, int RT3, int usedTime[3]) {
-    int i, RX, RY, RZ, usedTimeX = 0, usedTimeY = 0, usedTimeZ = 0, shortestDue, mostRemaining, mark = 0;
-    for (i = 0; i < RT1 + RT2 + RT3; i++) {
-        if (RT1 == 0 && RT2 == 0 && RT3 == 0 || Quantity <= 0) break;
-        RX = RT1 > 0 ? Quantity % RT1: __INT_MAX__;
-        RY = RT2 > 0 ? Quantity % RT2: __INT_MAX__;
-        RZ = RT3 > 0 ? Quantity % RT3: __INT_MAX__;
-        if (RX < RY && RX < RZ) {
-            RT1--;
-            Quantity -= 300;
-            usedTimeX++;
-            mark = isRemaining(Quantity, 1);
-        } 
-        else if (RY < RX && RY < RZ) {
-            RT2--;
-            Quantity -= 400;
-            usedTimeY++;
-            mark = isRemaining(Quantity, 2);
-        }
-        else if (RZ < RX && RZ < RY) {
-            RT3--;
-            Quantity -= 500;
-            usedTimeZ++;
-            mark = isRemaining(Quantity, 3);
-        }
-        else if (RZ == RX && RX == RY) {
-            shortestDue = MinThree(RT1, RT2, RT3);
-            if (shortestDue * 1200 > Quantity) {
-                switch(MaxThree(RT1, RT2, RT3)) {
-                    case 0:
-                        RT1--;
-                        usedTimeX++;
-                        Quantity -= 300;
-                        mark = isRemaining(Quantity, 1);
-                        break;
-                    case 1:
-                        RT2--;
-                        usedTimeY++;
-                        Quantity -= 400;
-                        mark = isRemaining(Quantity, 2);
-                        break;
-                    case 2:
-                        RT3--;
-                        usedTimeZ++;
-                        Quantity -= 500;
-                        mark = isRemaining(Quantity, 3);
-                        break;
-                    default:
-                        break;
-                }
-            }
-            else {
-                RT1--;
-                RT2--;
-                RT3--;
-                usedTimeX++;
-                usedTimeY++;
-                usedTimeZ++;
-                Quantity -= 1200;
-            }
-        }
-        else if (RX == RY && RX != RZ) {
-            shortestDue = MinTwo(RT1, RT2);
-            if (shortestDue * 700 > Quantity) {
-                switch(MaxTwo(RT1, RT2)) {
-                    case 0:
-                        RT1--;
-                        usedTimeX++;
-                        Quantity -= 300;
-                        mark = isRemaining(Quantity, 1);
-                        break;
-                    case 1:
-                        RT2--;
-                        usedTimeY++;
-                        Quantity -= 400;
-                        mark = isRemaining(Quantity, 2);
-                        break;
-                    default:
-                        break;
-                }
-            }
-            else {
-                RT1--;
-                RT2--;
-                usedTimeX++;
-                usedTimeY++;
-                Quantity -= 700;
-            }
-        }
-        else if (RX == RZ && RX != RY) {
-            shortestDue = MinTwo(RT1, RT3);
-            if (shortestDue * 700 > Quantity) {
-                switch(MaxTwo(RT1, RT3)) {
-                    case 0:
-                        RT1--;
-                        usedTimeX++;
-                        Quantity -= 300;
-                        mark = isRemaining(Quantity, 1);
-                        break;
-                    case 1:
-                        RT3--;
-                        usedTimeZ++;
-                        Quantity -= 500;
-                        mark = isRemaining(Quantity, 3);
-                        break;
-                    default:
-                        break;
-                }
-            }
-            else {
-                RT1--;
-                RT3--;
-                usedTimeX++;
-                usedTimeZ++;
-                Quantity -= 800;
-            }
-        }
-        else if (RY == RZ && RY != RX) {
-            shortestDue = MinTwo(RT2, RT3);
-            if (shortestDue * 700 > Quantity) {
-                switch(MaxTwo(RT2, RT3)) {
-                    case 0:
-                        RT2--;
-                        usedTimeY++;
-                        Quantity -= 400;
-                        mark = isRemaining(Quantity, 2);
-                        break;
-                    case 1:
-                        RT3--;
-                        usedTimeZ++;
-                        Quantity -= 500;
-                        mark = isRemaining(Quantity, 3);
-                        break;
-                    default:
-                        break;
-                }
-            }
-            else {
-                RT2--;
-                RT3--;
-                usedTimeY++;
-                usedTimeZ++;
-                Quantity -= 900;
-            }
-        }
-    }
-    usedTime[0] = usedTimeX;
-    usedTime[1] = usedTimeY;
-    usedTime[2] = usedTimeZ;
-    return mark;
-}
+// int allocate(int Quantity, int RT1, int RT2, int RT3, int usedTime[3]) {
+//     int i, RX, RY, RZ, usedTimeX = 0, usedTimeY = 0, usedTimeZ = 0, shortestDue, mostRemaining, mark = 0, Mark = -1;
+//     for (i = 0; i < RT1 + RT2 + RT3; i++) {
+//         if (RT1 == 0 && RT2 == 0 && RT3 == 0 || Quantity <= 0) break;
+//         RX = RT1 > 0 ? Quantity % 300: __INT_MAX__;
+//         RY = RT2 > 0 ? Quantity % 400: __INT_MAX__;
+//         RZ = RT3 > 0 ? Quantity % 500: __INT_MAX__;
+//         if (RX < RY && RX < RZ) {
+//             RT1--;
+//             Quantity -= 300;
+//             usedTimeX++;
+//             mark = isRemaining(Quantity, 1);
+//         } 
+//         else if (RY < RX && RY < RZ) {
+//             RT2--;
+//             Quantity -= 400;
+//             usedTimeY++;
+//             mark = isRemaining(Quantity, 2);
+//         }
+//         else if (RZ < RX && RZ < RY) {
+//             RT3--;
+//             Quantity -= 500;
+//             usedTimeZ++;
+//             mark = isRemaining(Quantity, 3);
+//         }
+//         else if (RZ == RX && RX == RY) {
+//             shortestDue = MinThree(RT1, RT2, RT3);
+//             if (shortestDue * 1200 > Quantity) {
+//                 if(Quantity <= 300 && RT1 > 0) {
+//                     RT1--;
+//                     usedTimeX++;
+//                     Quantity -= 300;
+//                     mark = isRemaining(Quantity, 1);
+//                 }
+//                 else if(Quantity <= 400 && RT2 > 0) {
+//                     RT2--;
+//                     usedTimeY++;
+//                     Quantity -= 400;
+//                     mark = isRemaining(Quantity, 2);
+//                 }
+//                 else if(Quantity <= 500 && RT3 > 0) {
+//                     RT3--;
+//                     usedTimeZ++;
+//                     Quantity -= 500;
+//                     mark = isRemaining(Quantity, 3);
+//                 }
+//                 else {
+//                     switch(MaxThree(RT1, RT2, RT3)) {
+//                         case 0:
+//                             RT1--;
+//                             usedTimeX++;
+//                             Quantity -= 300;
+//                             mark = isRemaining(Quantity, 1);
+//                             break;
+//                         case 1:
+//                             RT2--;
+//                             usedTimeY++;
+//                             Quantity -= 400;
+//                             mark = isRemaining(Quantity, 2);
+//                             break;
+//                         case 2:
+//                             RT3--;
+//                             usedTimeZ++;
+//                             Quantity -= 500;
+//                             mark = isRemaining(Quantity, 3);
+//                             break;
+//                         default:
+//                             break;
+//                     }
+//                 }
+//             }
+//             else {
+//                 RT1--;
+//                 RT2--;
+//                 RT3--;
+//                 usedTimeX++;
+//                 usedTimeY++;
+//                 usedTimeZ++;
+//                 Quantity -= 1200;
+//             }
+//         }
+//         else if (RX == RY && RX != RZ) {
+//             shortestDue = MinTwo(RT1, RT2);
+//             if (shortestDue * 700 > Quantity) {
+//                 switch(MaxTwo(RT1, RT2)) {
+//                     case 0:
+//                         RT1--;
+//                         usedTimeX++;
+//                         Quantity -= 300;
+//                         mark = isRemaining(Quantity, 1);
+//                         break;
+//                     case 1:
+//                         RT2--;
+//                         usedTimeY++;
+//                         Quantity -= 400;
+//                         mark = isRemaining(Quantity, 2);
+//                         break;
+//                     default:
+//                         break;
+//                 }
+//             }
+//             else {
+//                 RT1--;
+//                 RT2--;
+//                 usedTimeX++;
+//                 usedTimeY++;
+//                 Quantity -= 700;
+//             }
+//         }
+//         else if (RX == RZ && RX != RY) {
+//             shortestDue = MinTwo(RT1, RT3);
+//             if (shortestDue * 700 > Quantity) {
+//                 switch(MaxTwo(RT1, RT3)) {
+//                     case 0:
+//                         RT1--;
+//                         usedTimeX++;
+//                         Quantity -= 300;
+//                         mark = isRemaining(Quantity, 1);
+//                         break;
+//                     case 1:
+//                         RT3--;
+//                         usedTimeZ++;
+//                         Quantity -= 500;
+//                         mark = isRemaining(Quantity, 3);
+//                         break;
+//                     default:
+//                         break;
+//                 }
+//             }
+//             else {
+//                 RT1--;
+//                 RT3--;
+//                 usedTimeX++;
+//                 usedTimeZ++;
+//                 Quantity -= 800;
+//             }
+//         }
+//         else if (RY == RZ && RY != RX) {
+//             shortestDue = MinTwo(RT2, RT3);
+//             if (shortestDue * 700 > Quantity) {
+//                 switch(MaxTwo(RT2, RT3)) {
+//                     case 0:
+//                         RT2--;
+//                         usedTimeY++;
+//                         Quantity -= 400;
+//                         mark = isRemaining(Quantity, 2);
+//                         break;
+//                     case 1:
+//                         RT3--;
+//                         usedTimeZ++;
+//                         Quantity -= 500;
+//                         mark = isRemaining(Quantity, 3);
+//                         break;
+//                     default:
+//                         break;
+//                 }
+//             }
+//             else {
+//                 RT2--;
+//                 RT3--;
+//                 usedTimeY++;
+//                 usedTimeZ++;
+//                 Quantity -= 900;
+//             }
+//         }
+//         if(mark != -1) Mark = mark;
+//     }
+//     usedTime[0] = usedTimeX;
+//     usedTime[1] = usedTimeY;
+//     usedTime[2] = usedTimeZ;
+//     return Mark;
+// }
 // const char* date2Str(const struct Date date){
 //     char res[MAX_DATE_LEN];
 //     sprintf(res, "%d-%d-%d", date.year, date.month, date.day);
@@ -371,7 +430,7 @@ void addBatch(const char *str)
     {
         // Remove newline character if present
         buffer[strcspn(buffer, "\n")] = 0;
-        printf("You entered: %s\n", buffer);
+        //printf("You entered: %s\n", buffer);
         addOrder(buffer);
     }
 }
@@ -379,7 +438,7 @@ void addBatch(const char *str)
 void runPLS(const char *str)
 {
     sscanf(str, "runPLS %s | printREPORT > %s", algorithmName, reportFileName);
-    printf("use algorithm %s, report file to %s\n", algorithmName, reportFileName);
+    //printf("use algorithm %s, report file to %s\n", algorithmName, reportFileName);
     work(algorithmName, reportFileName);
 }
 void exitPLS()
@@ -391,27 +450,27 @@ void parseInput(const char *str)
 {
     if (startsWith(str, "addPERIOD"))
     {
-        puts("This is a addPERIOD command.");
+        //puts("This is a addPERIOD command.");
         addPeriod(str);
     }
     else if (startsWith(str, "addORDER"))
     {
-        puts("This is a addORDER command.");
+        //puts("This is a addORDER command.");
         addOrder(str);
     }
     else if (startsWith(str, "addBATCH"))
     {
-        puts("This is a addBATCH command.");
+        //puts("This is a addBATCH command.");
         addBatch(str);
     }
     else if (startsWith(str, "runPLS"))
     {
-        puts("This is a runPLS command.");
+        //puts("This is a runPLS command.");
         runPLS(str);
     }
     else if (startsWith(str, "exitPLS"))
     {
-        puts("This is a exitPLS command.");
+        //puts("This is a exitPLS command.");
         exitPLS();
     }
     else
@@ -432,7 +491,7 @@ void inputModule()
         {
             // Remove newline character if present
             buffer[strcspn(buffer, "\n")] = 0;
-            printf("You entered: %s\n", buffer);
+            //("You entered: %s\n", buffer);
             parseInput(buffer);
         }
     }
@@ -693,11 +752,18 @@ void work(const char *algorithm, const char *filename)
                 report.allocation[id].accepted = 0;
                 continue;
             }
-
+            X_remain = 0 > X_remain ? 0 : X_remain;
+            Y_remain = 0 > Y_remain ? 0 : Y_remain;
+            Z_remain = 0 > Z_remain ? 0 : Z_remain;
             // Allocation Calculation
             int alloc[3] = {0, 0, 0}; // days to assign to X, Y, Z
-            int vacancy = allocate(order[i].order_quantity, X_remain, Y_remain, Z_remain, alloc); // which plant has internal fragmentation
-
+            //int vacancy = allocate(order[i].order_quantity, X_remain, Y_remain, Z_remain, alloc); // which plant has internal fragmentation
+            int vacancy = kernel(order[i].order_quantity, X_remain, Y_remain, Z_remain, alloc); // which plant has internal fragmentation
+            if (vacancy == -1)
+            {
+                printf("error: invalid vacancy\n");
+                exit(1);
+            }
             // Report Generation
             // record the allocation for current order
             report.allocation[id].order_id = id;
@@ -741,22 +807,21 @@ void work(const char *algorithm, const char *filename)
                 ++currentZ;
             }
 
-
             // internal fragmentation handling
             int remain = (alloc[0] * 300 + alloc[1] * 400 + alloc[2] * 500) - order[i].order_quantity;
             switch(vacancy) {
                 case 0: // no internal fragmentation
                     break;
                 case 1: // internal fragmentation exists in X
-                    schedule.schedule_X[1][currentX] = 300 - remain;
+                    schedule.schedule_X[1][currentX - 1] = 300 - remain;
                     report.allocation[id].schedule[0][2] -= remain;
                     break;
                 case 2:
-                    schedule.schedule_Y[1][currentY] = 400 - remain;
+                    schedule.schedule_Y[1][currentY - 1] = 400 - remain;
                     report.allocation[id].schedule[1][2] -= remain;
                     break;
                 case 3:
-                    schedule.schedule_Z[1][currentZ] = 500 - remain;
+                    schedule.schedule_Z[1][currentZ - 1] = 500 - remain;
                     report.allocation[id].schedule[2][2] -= remain;
                     break;
                 default:
@@ -779,16 +844,12 @@ void work(const char *algorithm, const char *filename)
         report.Z[0] = currentZ;
         report.Z[1] = Z_total;
 
-        // print the schedule
-        printf("Schedule:\n");
-        printSchedule(schedule);
         // write the schedule to parent
         if (write(scheduler.fdc2p[1], &schedule, sizeof(struct Schedule)) < 0)
         {
             perror("error when writing schedule to parent");
             exit(EXIT_FAILURE);
         }
-        printf("111\n");
         // write the report to parent
         if (write(scheduler.fdc2p[1], &report, sizeof(struct Report)) < 0)
         {
@@ -976,7 +1037,7 @@ void writeReport(struct Report *report)
     // second column is product name, width 12
     // third column is due date, width 10
     // fourth column is quantity, width 8
-    fprintf(file, "%-10s%-12s%-10s%-8s\n", "ORDER NUMBER", "PRODUCT", "DUE DATE", "QUANTITY");
+    fprintf(file, "%-10s%-12s%-12s%-8s\n", "ORDER NUMBER", "PRODUCT", "DUE DATE", "QUANTITY");
     fprintf(file, "=====================================================\n");
     for (int i = 0; i < orderNum; i++)
     {

@@ -2,7 +2,7 @@
 #include <limits.h>
 
 int isRemaining(int a, int b) {
-    if (a = 0) return 0;
+    if (a == 0) return 0;
     if (a < 0) return b;
     return -1;
 }
@@ -30,26 +30,26 @@ int MinTwo(int a, int b) {
 
 int MaxThree(int a, int b, int c) {
     int max = a, ind = 0;
-    if (b > max) max = b; ind = 1;
-    if (c > max) max = c; ind = 2;
+    if (b > max) {max = b; ind = 1;}
+    if (c > max) {max = c; ind = 2;}
     return ind;
 }
 
 int MaxTwo(int a, int b) {
     int max = a, ind = 0;
-    if (b > max) max = b; ind = 1;
+    if (b > max) {max = b; ind = 1;}
     return ind;
 }
 
 //return which plant has internal fragmentation
 //0: no internal fragmentation, 1: plant A, 2: plant B, 3: plant C
 int remainingDueTimeCalculation(int Quantity, int RT1, int RT2, int RT3, int usedTime[3]) {
-    int i, RX, RY, RZ, usedTimeX = 0, usedTimeY = 0, usedTimeZ = 0, shortestDue, mostRemaining, mark = 0;
+    int i, RX, RY, RZ, usedTimeX = 0, usedTimeY = 0, usedTimeZ = 0, shortestDue, mostRemaining, mark = 0, Mark = -1;
     for (i = 0; i < RT1 + RT2 + RT3; i++) {
         if (RT1 == 0 && RT2 == 0 && RT3 == 0 || Quantity <= 0) break;
-        RX = RT1 > 0 ? Quantity % RT1: __INT_MAX__;
-        RY = RT2 > 0 ? Quantity % RT2: __INT_MAX__;
-        RZ = RT3 > 0 ? Quantity % RT3: __INT_MAX__;
+        RX = RT1 > 0 ? Quantity % 300: __INT_MAX__;
+        RY = RT2 > 0 ? Quantity % 400: __INT_MAX__;
+        RZ = RT3 > 0 ? Quantity % 500: __INT_MAX__;
         if (RX < RY && RX < RZ) {
             RT1--;
             Quantity -= 300;
@@ -71,27 +71,47 @@ int remainingDueTimeCalculation(int Quantity, int RT1, int RT2, int RT3, int use
         else if (RZ == RX && RX == RY) {
             shortestDue = MinThree(RT1, RT2, RT3);
             if (shortestDue * 1200 > Quantity) {
-                switch(MaxThree(RT1, RT2, RT3)) {
-                    case 0:
-                        RT1--;
-                        usedTimeX++;
-                        Quantity -= 300;
-                        mark = isRemaining(Quantity, 1);
-                        break;
-                    case 1:
-                        RT2--;
-                        usedTimeY++;
-                        Quantity -= 400;
-                        mark = isRemaining(Quantity, 2);
-                        break;
-                    case 2:
-                        RT3--;
-                        usedTimeZ++;
-                        Quantity -= 500;
-                        mark = isRemaining(Quantity, 3);
-                        break;
-                    default:
-                        break;
+                if(Quantity <= 300 && RT1 > 0) {
+                    RT1--;
+                    usedTimeX++;
+                    Quantity -= 300;
+                    mark = isRemaining(Quantity, 1);
+                }
+                else if(Quantity <= 400 && RT2 > 0) {
+                    RT2--;
+                    usedTimeY++;
+                    Quantity -= 400;
+                    mark = isRemaining(Quantity, 2);
+                }
+                else if(Quantity <= 500 && RT3 > 0) {
+                    RT3--;
+                    usedTimeZ++;
+                    Quantity -= 500;
+                    mark = isRemaining(Quantity, 3);
+                }
+                else {
+                    switch(MaxThree(RT1, RT2, RT3)) {
+                        case 0:
+                            RT1--;
+                            usedTimeX++;
+                            Quantity -= 300;
+                            mark = isRemaining(Quantity, 1);
+                            break;
+                        case 1:
+                            RT2--;
+                            usedTimeY++;
+                            Quantity -= 400;
+                            mark = isRemaining(Quantity, 2);
+                            break;
+                        case 2:
+                            RT3--;
+                            usedTimeZ++;
+                            Quantity -= 500;
+                            mark = isRemaining(Quantity, 3);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
             else {
@@ -188,15 +208,16 @@ int remainingDueTimeCalculation(int Quantity, int RT1, int RT2, int RT3, int use
                 Quantity -= 900;
             }
         }
+        if(mark != -1) Mark = mark;
     }
     usedTime[0] = usedTimeX;
     usedTime[1] = usedTimeY;
     usedTime[2] = usedTimeZ;
-    return mark;
+    return Mark;
 }
 
 int main() { //这只是一个test文件，debug专用嘿嘿
-    int Quantity = 2000, RT1 = 2, RT2 = 3, RT3 = 4, usedTime[3] = {0, 0, 0};
+    int Quantity = 3331, RT1 = 30, RT2 = 30, RT3 = 30, usedTime[3] = {0, 0, 0};
     int mark = remainingDueTimeCalculation(Quantity, RT1, RT2, RT3, usedTime);
     printf("Plant A: %d, Plant B: %d, Plant C: %d\n", usedTime[0], usedTime[1], usedTime[2]);
     printf("Internal Fragmentation: %d\n", mark);
