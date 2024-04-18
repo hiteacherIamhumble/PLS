@@ -61,17 +61,17 @@ P0020     Product_D   2024-06-052363
 
 Plant_X
        Number of days in use:                     55 days
-       Number of products produced:            15942 (intotal)
+       Number of products produced:            15942 (in total)
        Utilization of the plant:               94.89 %
 
 Plant_Y
        Number of days in use:                     39 days
-       Number of products produced:            15267 (intotal)
+       Number of products produced:            15267 (in total)
        Utilization of the plant:               68.16 %
 
 Plant_Z
        Number of days in use:                     25 days
-       Number of products produced:            12500 (intotal)
+       Number of products produced:            12500 (in total)
        Utilization of the plant:               44.64 %
 
 Overall of utilization:                        65.04 %
