@@ -2,55 +2,52 @@
 
 Algorithm used: NOVEL
 
-There are 19 Orders ACCEPTED. Details are as follows:
+There are 18 Orders ACCEPTED. Details are as follows:
 
     ORDER NUMBER         START           END    DAYS    QUANTITY    PLANT
 =====================================================================
-           P0001    2024-05-03    2024-05-08       6        2331  Plant_Y
-           P0001    2024-05-01    2024-05-02       2        1000  Plant_Z
-           P0002    2024-05-22    2024-05-24       3        1496  Plant_Z
-           P0003    2024-06-10    2024-06-11       2         547  Plant_Y
-           P0003    2024-05-12    2024-05-14       3        1500  Plant_Z
-           P0004    2024-06-25    2024-06-27       3         819  Plant_X
-           P0004    2024-06-13    2024-06-13       1         400  Plant_Y
-           P0004    2024-05-20    2024-05-20       1         500  Plant_Z
-           P0005    2024-05-25    2024-05-27       3        1473  Plant_Z
-           P0006    2024-06-07    2024-06-10       4        1164  Plant_X
-           P0006    2024-05-18    2024-05-19       2         800  Plant_Y
-           P0006    2024-05-07    2024-05-08       2        1000  Plant_Z
-           P0007    2024-05-14    2024-05-24      11        3283  Plant_X
-           P0007    2024-05-01    2024-05-01       1         400  Plant_Y
-           P0008    2024-06-14    2024-06-16       3        1150  Plant_Y
-           P0008    2024-05-21    2024-05-21       1         500  Plant_Z
-           P0009    2024-06-04    2024-06-09       6        2324  Plant_Y
-           P0011    2024-05-16    2024-05-19       4        1887  Plant_Z
-           P0012    2024-05-25    2024-06-03      10        2933  Plant_X
-           P0012    2024-05-02    2024-05-02       1         400  Plant_Y
-           P0013    2024-06-21    2024-06-24       4        1110  Plant_X
-           P0013    2024-06-12    2024-06-12       1         400  Plant_Y
-           P0013    2024-05-15    2024-05-15       1         500  Plant_Z
-           P0014    2024-06-04    2024-06-06       3         812  Plant_X
-           P0014    2024-05-09    2024-05-13       5        2000  Plant_Y
-           P0014    2024-05-03    2024-05-03       1         500  Plant_Z
-           P0015    2024-06-11    2024-06-19       9        2695  Plant_X
-           P0016    2024-05-20    2024-05-26       7        2776  Plant_Y
-           P0017    2024-05-14    2024-05-17       4        1566  Plant_Y
-           P0017    2024-05-04    2024-05-06       3        1500  Plant_Z
-           P0018    2024-05-01    2024-05-13      13        3872  Plant_X
-           P0019    2024-06-20    2024-06-20       1         249  Plant_X
-           P0019    2024-05-27    2024-05-28       2         800  Plant_Y
-           P0019    2024-05-09    2024-05-11       3        1500  Plant_Z
-           P0020    2024-05-29    2024-06-03       6        2363  Plant_Y
+           P0081    2024-06-02    2024-06-07       6        2316  Plant_Y
+           P0081    2024-05-14    2024-05-16       3        1500  Plant_Z
+           P0082    2024-05-01    2024-05-02       2         512  Plant_X
+           P0082    2024-05-01    2024-05-01       1         500  Plant_Z
+           P0083    2024-05-09    2024-05-15       7        2726  Plant_Y
+           P0084    2024-06-06    2024-06-12       7        2082  Plant_X
+           P0084    2024-05-07    2024-05-07       1         400  Plant_Y
+           P0085    2024-05-10    2024-05-14       5        1480  Plant_X
+           P0086    2024-05-31    2024-06-05       6        1747  Plant_X
+           P0086    2024-05-06    2024-05-06       1         500  Plant_Z
+           P0088    2024-05-25    2024-05-30       6        1746  Plant_X
+           P0088    2024-05-05    2024-05-05       1         500  Plant_Z
+           P0089    2024-05-15    2024-05-18       4        1136  Plant_X
+           P0089    2024-05-03    2024-05-03       1         500  Plant_Z
+           P0090    2024-05-28    2024-06-01       5        1995  Plant_Y
+           P0090    2024-05-12    2024-05-13       2        1000  Plant_Z
+           P0091    2024-06-13    2024-06-15       3         824  Plant_X
+           P0091    2024-05-08    2024-05-08       1         400  Plant_Y
+           P0091    2024-05-07    2024-05-09       3        1500  Plant_Z
+           P0092    2024-06-08    2024-06-08       1         324  Plant_Y
+           P0092    2024-05-17    2024-05-23       7        3500  Plant_Z
+           P0093    2024-06-16    2024-06-16       1         277  Plant_X
+           P0093    2024-06-09    2024-06-12       4        1600  Plant_Y
+           P0093    2024-05-24    2024-05-27       4        2000  Plant_Z
+           P0094    2024-05-16    2024-05-22       7        2763  Plant_Y
+           P0095    2024-05-23    2024-05-27       5        1963  Plant_Y
+           P0095    2024-05-10    2024-05-11       2        1000  Plant_Z
+           P0096    2024-05-03    2024-05-04       2         559  Plant_X
+           P0096    2024-05-02    2024-05-02       1         500  Plant_Z
+           P0097    2024-05-01    2024-05-06       6        2395  Plant_Y
+           P0099    2024-05-05    2024-05-09       5        1433  Plant_X
+           P0100    2024-05-19    2024-05-24       6        1706  Plant_X
+           P0100    2024-05-04    2024-05-04       1         500  Plant_Z
 - End -
 
 =====================================================================
 
 
-There are 1 Orders REJECTED. Details are as follows:
+There are 0 Orders REJECTED. Details are as follows:
 
-ORDER NUMBERPRODUCT     DUE DATE    QUANTITY
+    ORDER NUMBER    PRODUCT      DUE DATE    QUANTITY
 =====================================================
-P0010     Product_C   2024-06-091394    
 - End -
 
 =====================================================
@@ -59,18 +56,18 @@ P0010     Product_C   2024-06-091394
 ***PERFORMANCE
 
 Plant_X
-       Number of days in use:                     58 days
-       Number of products produced:            16937 (intotal)
-       Utilization of the plant:              100.82 %
+       Number of days in use:                     47 days
+       Number of products produced:            13502 (in total)
+       Utilization of the plant:               80.37 %
 
 Plant_Y
-       Number of days in use:                     47 days
-       Number of products produced:            18257 (intotal)
-       Utilization of the plant:               81.50 %
+       Number of days in use:                     43 days
+       Number of products produced:            16882 (in total)
+       Utilization of the plant:               75.37 %
 
 Plant_Z
        Number of days in use:                     27 days
-       Number of products produced:            13356 (intotal)
-       Utilization of the plant:               47.70 %
+       Number of products produced:            13500 (in total)
+       Utilization of the plant:               48.21 %
 
-Overall of utilization:                        72.25 %
+Overall of utilization:                        65.30 %

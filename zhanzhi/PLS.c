@@ -1,6 +1,5 @@
 #include <sys/types.h>
 #include <sys/stat.h>
-// #include <sys/wait.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <time.h>
@@ -8,6 +7,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #define MAX_DATE_LEN 32
 struct tm startDate = {0}, endDate = {0};
@@ -85,16 +86,17 @@ void promptEnter();
 int startsWith(const char *str, const char *prefix);
 const struct tm str2Date(const char *str);
 void addPeriod(const char *str);
-void addOrder(const char *str);
+int addOrder(const char *str);
 void addBatch(const char *str);
 void runPLS(const char *str);
 void exitPLS();
+void work(const char *algorithm, const char *filename);
 void parseInput(const char *str);
 void inputModule();
 void invokeScheduler(const char *str);
 void invoke(const char *str);
 int dateDiff(const struct tm *startDate, const struct tm *endDate);
-int allocate(int, int, int, int, int[3]);
+void writeReport(struct Report *report);
 
 int kernel(int Q, int Rx, int Ry, int Rz, int alloc[3]) {
     
@@ -134,39 +136,6 @@ int kernel(int Q, int Rx, int Ry, int Rz, int alloc[3]) {
         return -1;
     }
 }
-
-// int isRemaining(int a, int b) {
-//     if (a == 0) return 0;
-//     if (a < 0) return b;
-//     return -1;
-// }
-
-// int MinThree(int a, int b, int c) {
-//     int min = a;
-//     if (b < min) min = b;
-//     if (c < min) min = c;
-//     return min;
-// }
-
-// int MinTwo(int a, int b) {
-//     int min = a;
-//     if (b < min) min = b;
-//     return min;
-// }
-
-// int MaxThree(int a, int b, int c) {
-//     int max = a, ind = 0;
-//     if (b > max) {max = b; ind = 1;}
-//     if (c > max) {max = c; ind = 2;}
-//     return ind;
-// }
-
-// int MaxTwo(int a, int b) {
-//     int max = a, ind = 0;
-//     if (b > max) {max = b; ind = 1;}
-//     return ind;
-// }
-
 void promptEnter()
 {
     printf("Please enter:\n> ");
@@ -201,8 +170,8 @@ const struct tm str2Date(const char *str)
 
 int dateDiff(const struct tm *startDate, const struct tm *endDate)
 {
-    time_t start = mktime(startDate);
-    time_t end = mktime(endDate);
+    time_t start = mktime((struct tm *)startDate);
+    time_t end = mktime((struct tm *)endDate);
     if (start == -1 || end == -1)
     {
         perror("mktime");
@@ -212,178 +181,7 @@ int dateDiff(const struct tm *startDate, const struct tm *endDate)
     return (int)diff / (60 * 60 * 24);
 }
 
-// int allocate(int Quantity, int RT1, int RT2, int RT3, int usedTime[3]) {
-//     int i, RX, RY, RZ, usedTimeX = 0, usedTimeY = 0, usedTimeZ = 0, shortestDue, mostRemaining, mark = 0, Mark = -1;
-//     for (i = 0; i < RT1 + RT2 + RT3; i++) {
-//         if (RT1 == 0 && RT2 == 0 && RT3 == 0 || Quantity <= 0) break;
-//         RX = RT1 > 0 ? Quantity % 300: __INT_MAX__;
-//         RY = RT2 > 0 ? Quantity % 400: __INT_MAX__;
-//         RZ = RT3 > 0 ? Quantity % 500: __INT_MAX__;
-//         if (RX < RY && RX < RZ) {
-//             RT1--;
-//             Quantity -= 300;
-//             usedTimeX++;
-//             mark = isRemaining(Quantity, 1);
-//         } 
-//         else if (RY < RX && RY < RZ) {
-//             RT2--;
-//             Quantity -= 400;
-//             usedTimeY++;
-//             mark = isRemaining(Quantity, 2);
-//         }
-//         else if (RZ < RX && RZ < RY) {
-//             RT3--;
-//             Quantity -= 500;
-//             usedTimeZ++;
-//             mark = isRemaining(Quantity, 3);
-//         }
-//         else if (RZ == RX && RX == RY) {
-//             shortestDue = MinThree(RT1, RT2, RT3);
-//             if (shortestDue * 1200 > Quantity) {
-//                 if(Quantity <= 300 && RT1 > 0) {
-//                     RT1--;
-//                     usedTimeX++;
-//                     Quantity -= 300;
-//                     mark = isRemaining(Quantity, 1);
-//                 }
-//                 else if(Quantity <= 400 && RT2 > 0) {
-//                     RT2--;
-//                     usedTimeY++;
-//                     Quantity -= 400;
-//                     mark = isRemaining(Quantity, 2);
-//                 }
-//                 else if(Quantity <= 500 && RT3 > 0) {
-//                     RT3--;
-//                     usedTimeZ++;
-//                     Quantity -= 500;
-//                     mark = isRemaining(Quantity, 3);
-//                 }
-//                 else {
-//                     switch(MaxThree(RT1, RT2, RT3)) {
-//                         case 0:
-//                             RT1--;
-//                             usedTimeX++;
-//                             Quantity -= 300;
-//                             mark = isRemaining(Quantity, 1);
-//                             break;
-//                         case 1:
-//                             RT2--;
-//                             usedTimeY++;
-//                             Quantity -= 400;
-//                             mark = isRemaining(Quantity, 2);
-//                             break;
-//                         case 2:
-//                             RT3--;
-//                             usedTimeZ++;
-//                             Quantity -= 500;
-//                             mark = isRemaining(Quantity, 3);
-//                             break;
-//                         default:
-//                             break;
-//                     }
-//                 }
-//             }
-//             else {
-//                 RT1--;
-//                 RT2--;
-//                 RT3--;
-//                 usedTimeX++;
-//                 usedTimeY++;
-//                 usedTimeZ++;
-//                 Quantity -= 1200;
-//             }
-//         }
-//         else if (RX == RY && RX != RZ) {
-//             shortestDue = MinTwo(RT1, RT2);
-//             if (shortestDue * 700 > Quantity) {
-//                 switch(MaxTwo(RT1, RT2)) {
-//                     case 0:
-//                         RT1--;
-//                         usedTimeX++;
-//                         Quantity -= 300;
-//                         mark = isRemaining(Quantity, 1);
-//                         break;
-//                     case 1:
-//                         RT2--;
-//                         usedTimeY++;
-//                         Quantity -= 400;
-//                         mark = isRemaining(Quantity, 2);
-//                         break;
-//                     default:
-//                         break;
-//                 }
-//             }
-//             else {
-//                 RT1--;
-//                 RT2--;
-//                 usedTimeX++;
-//                 usedTimeY++;
-//                 Quantity -= 700;
-//             }
-//         }
-//         else if (RX == RZ && RX != RY) {
-//             shortestDue = MinTwo(RT1, RT3);
-//             if (shortestDue * 700 > Quantity) {
-//                 switch(MaxTwo(RT1, RT3)) {
-//                     case 0:
-//                         RT1--;
-//                         usedTimeX++;
-//                         Quantity -= 300;
-//                         mark = isRemaining(Quantity, 1);
-//                         break;
-//                     case 1:
-//                         RT3--;
-//                         usedTimeZ++;
-//                         Quantity -= 500;
-//                         mark = isRemaining(Quantity, 3);
-//                         break;
-//                     default:
-//                         break;
-//                 }
-//             }
-//             else {
-//                 RT1--;
-//                 RT3--;
-//                 usedTimeX++;
-//                 usedTimeZ++;
-//                 Quantity -= 800;
-//             }
-//         }
-//         else if (RY == RZ && RY != RX) {
-//             shortestDue = MinTwo(RT2, RT3);
-//             if (shortestDue * 700 > Quantity) {
-//                 switch(MaxTwo(RT2, RT3)) {
-//                     case 0:
-//                         RT2--;
-//                         usedTimeY++;
-//                         Quantity -= 400;
-//                         mark = isRemaining(Quantity, 2);
-//                         break;
-//                     case 1:
-//                         RT3--;
-//                         usedTimeZ++;
-//                         Quantity -= 500;
-//                         mark = isRemaining(Quantity, 3);
-//                         break;
-//                     default:
-//                         break;
-//                 }
-//             }
-//             else {
-//                 RT2--;
-//                 RT3--;
-//                 usedTimeY++;
-//                 usedTimeZ++;
-//                 Quantity -= 900;
-//             }
-//         }
-//         if(mark != -1) Mark = mark;
-//     }
-//     usedTime[0] = usedTimeX;
-//     usedTime[1] = usedTimeY;
-//     usedTime[2] = usedTimeZ;
-//     return Mark;
-// }
+
 // const char* date2Str(const struct Date date){
 //     char res[MAX_DATE_LEN];
 //     sprintf(res, "%d-%d-%d", date.year, date.month, date.day);
@@ -403,16 +201,53 @@ void addPeriod(const char *str)
     // printf("start date is %d-%d-%d\n", startDate.year, startDate.month, startDate.day);
     // printf("start date is %d-%d-%d\n", endDate.year, endDate.month, endDate.day);
 }
-void addOrder(const char *str)
+const char INVALID_INPUTS[] = "InvalidInputs.txt";
+void appendToInvalidFile(const char *str){
+    FILE *filePtr;
+    // Open the file in append mode
+    filePtr = fopen(INVALID_INPUTS, "a");
+    if (filePtr == NULL) {
+        perror("Error opening file");
+        return;
+    }
+
+    // Append the line to the file
+    if (fprintf(filePtr, "%s\n", str) < 0) {
+        perror("Error writing to file");
+        // Close the file before returning
+        fclose(filePtr);
+        return;
+    }
+
+    // Close the file
+    fclose(filePtr);
+}
+int CheckDueDate(struct tm orderDueDate){
+    // check if that due date is within the period
+    // if is, return 1
+    // if not, return 0
+    if (dateDiff(&startDate, &orderDueDate) < 0 || dateDiff(&endDate, &orderDueDate) > 0)
+    {
+        return 0;
+    }
+    return 1;
+
+}
+int addOrder(const char *str)
 {
     // str is a addORDER command.
     char dueDateStr[MAX_DATE_LEN];
     sscanf(str, "addORDER %s %s %d Product_%c", order[orderNum].order_number, dueDateStr, &order[orderNum].order_quantity, &order[orderNum].product_name);
+    struct tm orderDueDate = str2Date(dueDateStr);
+    int n = CheckDueDate(orderDueDate);
+    if ( n == 0 ){
+        appendToInvalidFile(str);
+        return 1;
+    }
     order[orderNum].order_id = orderNum;
     order[orderNum].dueDate = str2Date(dueDateStr);
-    // printf("order number is %s, due date is %s, quantity is %d, product name is %c\n", order[orderNum].order_number, date2Str(order[orderNum].dueDate), order[orderNum].order_quantity, order[orderNum].product_name);
-    // printf("order number is %s, due date is %s, quantity is %d, product name is %c\n", order[orderNum].order_number, dueDateStr, order[orderNum].order_quantity, order[orderNum].product_name);
     ++orderNum;
+    return 0;
 }
 void addBatch(const char *str)
 {
@@ -426,12 +261,19 @@ void addBatch(const char *str)
     }
     const int MAX_INPUT_LEN = 1024;
     char buffer[MAX_INPUT_LEN];
+    int invalid = 0;
     while (fgets(buffer, sizeof(buffer), file) != NULL)
     {
         // Remove newline character if present
         buffer[strcspn(buffer, "\n")] = 0;
         //printf("You entered: %s\n", buffer);
-        addOrder(buffer);
+        int p = addOrder(buffer);
+        if (p == 1) {
+            invalid = 1;
+        }
+    }
+    if (invalid == 1) {
+       printf("Some due dates are out of period, deemed invalid input, saved these lines to file InvalidInputs.txt.\n");
     }
 }
 
@@ -652,209 +494,248 @@ void work(const char *algorithm, const char *filename)
             exit(EXIT_FAILURE);
         }
         // orders
-        struct Order order[orderNum];
-        if (read(scheduler.fdp2c[0], order, sizeof(struct Order) * orderNum) < 0)
+        struct Order order[3][orderNum];
+        if (read(scheduler.fdp2c[0], order[0], sizeof(struct Order) * orderNum) < 0)
         {
             perror("error when reading orders from parent");
             exit(EXIT_FAILURE);
         }
+        // make two order list copys
+        for (int i = 0; i < orderNum; i++)
+        {
+            order[1][i] = order[0][i];
+            order[2][i] = order[0][i];
+        }
         // schedule & report
         // initialize schedule
-        struct Schedule schedule;
-        schedule.schedule_id = 0;
-        schedule.period = period;
-        for (int i = 0; i < MAX_ORDER_NUM; i++)
-        {
-            schedule.schedule_X[0][i] = -1;
-            schedule.schedule_X[1][i] = -1;
-            schedule.schedule_Y[0][i] = -1;
-            schedule.schedule_Y[1][i] = -1;
-            schedule.schedule_Z[0][i] = -1;
-            schedule.schedule_Z[1][i] = -1;
+        struct Schedule schedule[3];
+        for (int m = 0; m < 3; ++ m) {
+            schedule[m].schedule_id = 0;
+            schedule[m].period = period;
+             for (int i = 0; i < MAX_ORDER_NUM; i++)
+            {
+                schedule[m].schedule_X[0][i] = -1;
+                schedule[m].schedule_X[1][i] = -1;
+                schedule[m].schedule_Y[0][i] = -1;
+                schedule[m].schedule_Y[1][i] = -1;
+                schedule[m].schedule_Z[0][i] = -1;
+                schedule[m].schedule_Z[1][i] = -1;
+            }
         }
+        
+       
         // initialize report
-        struct Report report;
-        for (int i = 0; i < MAX_ORDER_NUM; i++)
-        {
-            report.allocation[i].order_id = -1;
-            report.allocation[i].accepted = -1;
+        struct Report report[3];
+        
+        for (int m =0; m < 3; m++) {
+            for (int i = 0; i < MAX_ORDER_NUM; i++) {
+            report[m].allocation[i].order_id = -1;
+            report[m].allocation[i].accepted = -1;
             for (int j = 0; j < 3; j++)
             {
                 for (int k = 0; k < 3; k++)
                 {
-                    report.allocation[i].schedule[j][k] = -1;
+                    report[m].allocation[i].schedule[j][k] = -1;
+                    report[m].allocation[i].schedule[j][k] = -1;
+                    report[m].allocation[i].schedule[j][k] = -1;
                 }
             }
+            }
+        }
+        
+
+        // SJF
+        for (int i = 0; i < orderNum - 1; i++)
+        {
+            for (int j = 0; j < orderNum - i - 1; j++)
+            {
+                if (order[1][j].order_quantity > order[1][j + 1].order_quantity)
+                {
+                    struct Order temp = order[1][j];
+                    order[1][j] = order[1][j + 1];
+                    order[1][j + 1] = temp;
+                }
+            }
+        }
+        
+        // NOVEL
+        for (int i = 0; i < orderNum - 1; i++)
+        {
+            for (int j = 0; j < orderNum - i - 1; j++)
+            {
+                if (order[2][j].order_quantity < order[2][j + 1].order_quantity)
+                {
+                    struct Order temp = order[2][j];
+                    order[2][j] = order[2][j + 1];
+                    order[2][j + 1] = temp;
+                }
+            }
+        }
+        
+        for (int m = 0; m < 3; m ++) {
+            // tranverse the order list to generate schedule
+            int currentX = 0, currentY = 0, currentZ = 0; //current production days of X, Y, Z
+            int X_remain = 0, Y_remain = 0, Z_remain = 0; //remaining days of X, Y, Z before due
+            int X_total = 0, Y_total = 0, Z_total = 0;    //total quantity of X, Y, Z
+            for (int i = 0; i < orderNum; i++)
+            {
+                int id = order[m][i].order_id;
+                X_remain = dateDiff(&period.startDate, &order[m][i].dueDate) - currentX;
+                Y_remain = dateDiff(&period.startDate, &order[m][i].dueDate) - currentY;
+                Z_remain = dateDiff(&period.startDate, &order[m][i].dueDate) - currentZ;
+                // Acceptance Judge
+                // deney the order if the three plants cannot produce the product before its due date
+                if (300 * X_remain + 400 * Y_remain + 500 * Z_remain < order[m][id].order_quantity)
+                {
+                    // deney the order
+                    report[m].allocation[id].order_id = id;
+                    report[m].allocation[id].accepted = 0;
+                    continue;
+                }
+                X_remain = 0 > X_remain ? 0 : X_remain;
+                Y_remain = 0 > Y_remain ? 0 : Y_remain;
+                Z_remain = 0 > Z_remain ? 0 : Z_remain;
+                // Allocation Calculation
+                int alloc[3] = {0, 0, 0}; // days to assign to X, Y, Z
+                //int vacancy = allocate(order[i].order_quantity, X_remain, Y_remain, Z_remain, alloc); // which plant has internal fragmentation
+                int vacancy;
+                vacancy = kernel(order[m][i].order_quantity, X_remain, Y_remain, Z_remain, alloc); // which plant has internal fragmentation
+                
+                
+                if (vacancy == -1)
+                {
+                    printf("error: invalid vacancy\n");
+                    exit(1);
+                }
+
+                // Report Generation
+                // record the allocation for current order
+                report[m].allocation[id].order_id = id;
+                report[m].allocation[id].accepted = 1;
+                report[m].allocation[id].schedule[0][0] = currentX;
+                report[m].allocation[id].schedule[1][0] = currentY;
+                report[m].allocation[id].schedule[2][0] = currentZ;
+                report[m].allocation[id].schedule[0][1] = alloc[0];
+                report[m].allocation[id].schedule[1][1] = alloc[1];
+                report[m].allocation[id].schedule[2][1] = alloc[2];
+                report[m].allocation[id].schedule[0][2] = 0;
+                report[m].allocation[id].schedule[1][2] = 0;
+                report[m].allocation[id].schedule[2][2] = 0;
+
+                // Schedule Generation
+                for (int j = 0; j < alloc[0]; j++)
+                {
+                    //Plant X: day[currentX] produce 300 quantity
+                    schedule[m].schedule_X[0][currentX] = id;
+                    schedule[m].schedule_X[1][currentX] = 300;
+                    //current order produced in plant X
+                    report[m].allocation[id].schedule[0][2] += 300;
+                    ++currentX;
+                }
+                for (int j = 0; j < alloc[1]; j++)
+                {
+                    //Plant Y: day[currentY] produce 400 quantity
+                    schedule[m].schedule_Y[0][currentY] = id;
+                    schedule[m].schedule_Y[1][currentY] = 400;
+                    //current order produced in plant Y
+                    report[m].allocation[id].schedule[1][2] += 400;
+                    ++currentY;
+                }
+                for (int j = 0; j < alloc[2]; j++)
+                {
+                    //Plant Z: day[currentZ] produce 500 quantity
+                    schedule[m].schedule_Z[0][currentZ] = id;
+                    schedule[m].schedule_Z[1][currentZ] = 500;
+                    //current order produced in plant Z
+                    report[m].allocation[id].schedule[2][2] += 500;
+                    ++currentZ;
+                }
+                // internal fragmentation handling
+                int remain = (alloc[0] * 300 + alloc[1] * 400 + alloc[2] * 500) - order[m][i].order_quantity;
+                switch(vacancy) {
+                    case 0: // no internal fragmentation
+                        break;
+                    case 1: // internal fragmentation exists in X
+                        schedule[m].schedule_X[1][currentX - 1] = 300 - remain;
+                        report[m].allocation[id].schedule[0][2] -= remain;
+                        break;
+                    case 2:
+                        schedule[m].schedule_Y[1][currentY - 1] = 400 - remain;
+                        report[m].allocation[id].schedule[1][2] -= remain;
+                        break;
+                    case 3:
+                        schedule[m].schedule_Z[1][currentZ - 1] = 500 - remain;
+                        report[m].allocation[id].schedule[2][2] -= remain;
+                        break;
+                    default:
+                    printf("error: invalid vacancy\n");
+                        break;
+                }
+
+                // update the total quantity of X, Y, Z
+                X_total += report[m].allocation[id].schedule[0][2];
+                Y_total += report[m].allocation[id].schedule[1][2];
+                Z_total += report[m].allocation[id].schedule[2][2];
+
+            }
+
+            // report the total quantity of X, Y, Z
+            report[m].X[0] = currentX;
+            report[m].X[1] = X_total;
+            report[m].Y[0] = currentY;
+            report[m].Y[1] = Y_total;
+            report[m].Z[0] = currentZ;
+            report[m].Z[1] = Z_total;
+
         }
 
-        // reorder the order list according to the algorithm
-        if (strcmp(algorithmName, "FCFS") == 0)
-        {
-            // FCFS
-            // sort by order_id, already done
-        }
-        else if (strcmp(algorithmName, "SJF") == 0)
-        {
-            // SJF
-            // sort by order_quantity
-            // bubble sort
-            for (int i = 0; i < orderNum - 1; i++)
+        if (strcmp(algorithmName, "FCFS") == 0) {
+            // write the schedule to parent
+            if (write(scheduler.fdc2p[1], &schedule[0], sizeof(struct Schedule)) < 0)
             {
-                for (int j = 0; j < orderNum - i - 1; j++)
-                {
-                    if (order[j].order_quantity > order[j + 1].order_quantity)
-                    {
-                        struct Order temp = order[j];
-                        order[j] = order[j + 1];
-                        order[j + 1] = temp;
-                    }
-                }
+                perror("error when writing schedule to parent");
+                exit(EXIT_FAILURE);
             }
-        }
-        else if (strcmp(algorithmName, "NOVEL") == 0)
-        {
-            // NOVEL
-            // sort by order_quantity in descending order
-            // bubble sort
-            for (int i = 0; i < orderNum - 1; i++)
+            // write the report to parent
+            if (write(scheduler.fdc2p[1], &report[0], sizeof(struct Report)) < 0)
             {
-                for (int j = 0; j < orderNum - i - 1; j++)
-                {
-                    if (order[j].order_quantity < order[j + 1].order_quantity)
-                    {
-                        struct Order temp = order[j];
-                        order[j] = order[j + 1];
-                        order[j + 1] = temp;
-                    }
-                }
+                perror("error when writing report to parent");
+                exit(EXIT_FAILURE);
+            }
+        } else if (strcmp(algorithmName, "SJF") == 0) {
+            // write the schedule to parent
+            if (write(scheduler.fdc2p[1], &schedule[1], sizeof(struct Schedule)) < 0)
+            {
+                perror("error when writing schedule to parent");
+                exit(EXIT_FAILURE);
+            }
+            // write the report to parent
+            if (write(scheduler.fdc2p[1], &report[1], sizeof(struct Report)) < 0)
+            {
+                perror("error when writing report to parent");
+                exit(EXIT_FAILURE);
             }
         } else {
-            fprintf(stderr, "Error: Invalid algorithm name.\n");
-            exit(1);
-        }
-
-        // tranverse the order list to generate schedule
-        int currentX = 0, currentY = 0, currentZ = 0; //current production days of X, Y, Z
-        int X_remain = 0, Y_remain = 0, Z_remain = 0; //remaining days of X, Y, Z before due
-        int X_total = 0, Y_total = 0, Z_total = 0;    //total quantity of X, Y, Z
-        for (int i = 0; i < orderNum; i++)
-        {
-            int id = order[i].order_id;
-            X_remain = dateDiff(&period.startDate, &order[i].dueDate) - currentX;
-            Y_remain = dateDiff(&period.startDate, &order[i].dueDate) - currentY;
-            Z_remain = dateDiff(&period.startDate, &order[i].dueDate) - currentZ;
-            // Acceptance Judge
-            // deney the order if the three plants cannot produce the product before its due date
-            if (300 * X_remain + 400 * Y_remain + 500 * Z_remain < order[id].order_quantity)
+            int w = 0;
+            float s = 0;
+            for (int m = 0; m < 3; m++) {
+                if(report[m].X[1] + report[m].Y[1] + report[m].Z[1] >= s) {
+                    w = m;
+                    s = report[m].X[1] + report[m].Y[1] + report[m].Z[1];
+                }
+            }
+            // write the schedule to parent
+            if (write(scheduler.fdc2p[1], &schedule[w], sizeof(struct Schedule)) < 0)
             {
-                // deney the order
-                report.allocation[id].order_id = id;
-                report.allocation[id].accepted = 0;
-                continue;
+                perror("error when writing schedule to parent");
+                exit(EXIT_FAILURE);
             }
-            X_remain = 0 > X_remain ? 0 : X_remain;
-            Y_remain = 0 > Y_remain ? 0 : Y_remain;
-            Z_remain = 0 > Z_remain ? 0 : Z_remain;
-            // Allocation Calculation
-            int alloc[3] = {0, 0, 0}; // days to assign to X, Y, Z
-            //int vacancy = allocate(order[i].order_quantity, X_remain, Y_remain, Z_remain, alloc); // which plant has internal fragmentation
-            int vacancy = kernel(order[i].order_quantity, X_remain, Y_remain, Z_remain, alloc); // which plant has internal fragmentation
-            if (vacancy == -1)
+            // write the report to parent
+            if (write(scheduler.fdc2p[1], &report[w], sizeof(struct Report)) < 0)
             {
-                printf("error: invalid vacancy\n");
-                exit(1);
+                perror("error when writing report to parent");
+                exit(EXIT_FAILURE);
             }
-            // Report Generation
-            // record the allocation for current order
-            report.allocation[id].order_id = id;
-            report.allocation[id].accepted = 1;
-            report.allocation[id].schedule[0][0] = currentX;
-            report.allocation[id].schedule[1][0] = currentY;
-            report.allocation[id].schedule[2][0] = currentZ;
-            report.allocation[id].schedule[0][1] = alloc[0];
-            report.allocation[id].schedule[1][1] = alloc[1];
-            report.allocation[id].schedule[2][1] = alloc[2];
-            report.allocation[id].schedule[0][2] = 0;
-            report.allocation[id].schedule[1][2] = 0;
-            report.allocation[id].schedule[2][2] = 0;
-
-            // Schedule Generation
-            for (int j = 0; j < alloc[0]; j++)
-            {
-                //Plant X: day[currentX] produce 300 quantity
-                schedule.schedule_X[0][currentX] = id;
-                schedule.schedule_X[1][currentX] = 300;
-                //current order produced in plant X
-                report.allocation[id].schedule[0][2] += 300;
-                ++currentX;
-            }
-            for (int j = 0; j < alloc[1]; j++)
-            {
-                //Plant Y: day[currentY] produce 400 quantity
-                schedule.schedule_Y[0][currentY] = id;
-                schedule.schedule_Y[1][currentY] = 400;
-                //current order produced in plant Y
-                report.allocation[id].schedule[1][2] += 400;
-                ++currentY;
-            }
-            for (int j = 0; j < alloc[2]; j++)
-            {
-                //Plant Z: day[currentZ] produce 500 quantity
-                schedule.schedule_Z[0][currentZ] = id;
-                schedule.schedule_Z[1][currentZ] = 500;
-                //current order produced in plant Z
-                report.allocation[id].schedule[2][2] += 500;
-                ++currentZ;
-            }
-
-            // internal fragmentation handling
-            int remain = (alloc[0] * 300 + alloc[1] * 400 + alloc[2] * 500) - order[i].order_quantity;
-            switch(vacancy) {
-                case 0: // no internal fragmentation
-                    break;
-                case 1: // internal fragmentation exists in X
-                    schedule.schedule_X[1][currentX - 1] = 300 - remain;
-                    report.allocation[id].schedule[0][2] -= remain;
-                    break;
-                case 2:
-                    schedule.schedule_Y[1][currentY - 1] = 400 - remain;
-                    report.allocation[id].schedule[1][2] -= remain;
-                    break;
-                case 3:
-                    schedule.schedule_Z[1][currentZ - 1] = 500 - remain;
-                    report.allocation[id].schedule[2][2] -= remain;
-                    break;
-                default:
-                printf("error: invalid vacancy\n");
-                    break;
-            }
-
-            // update the total quantity of X, Y, Z
-            X_total += report.allocation[id].schedule[0][2];
-            Y_total += report.allocation[id].schedule[1][2];
-            Z_total += report.allocation[id].schedule[2][2];
-
-        }
-
-        // report the total quantity of X, Y, Z
-        report.X[0] = currentX;
-        report.X[1] = X_total;
-        report.Y[0] = currentY;
-        report.Y[1] = Y_total;
-        report.Z[0] = currentZ;
-        report.Z[1] = Z_total;
-
-        // write the schedule to parent
-        if (write(scheduler.fdc2p[1], &schedule, sizeof(struct Schedule)) < 0)
-        {
-            perror("error when writing schedule to parent");
-            exit(EXIT_FAILURE);
-        }
-        // write the report to parent
-        if (write(scheduler.fdc2p[1], &report, sizeof(struct Report)) < 0)
-        {
-            perror("error when writing report to parent");
-            exit(EXIT_FAILURE);
         }
         // close the pipe
         close(scheduler.fdp2c[0]);
@@ -940,6 +821,7 @@ void work(const char *algorithm, const char *filename)
         close(scheduler.fdc2p[0]);
         // wait for the scheduler process to terminate, then proceed
         int status;
+
         waitpid(scheduler.pid, &status, 0);
         // print the schedule to console
         printSchedule(schedule);
@@ -962,7 +844,7 @@ int calcAccepted(struct Report *report)
 }
 void writeReport(struct Report *report)
 {
-    int totalDays = diffDate(startDate, endDate) + 1;
+    int totalDays = diffDate(startDate, endDate) + 1;   
     FILE *file = fopen(reportFileName, "w");
     if (file == NULL)
     {
@@ -1033,11 +915,11 @@ void writeReport(struct Report *report)
     // then print rejected orders
     fprintf(file, "There are %d Orders REJECTED. Details are as follows:\n\n", rejected);
     // print column names
-    // first column is order number, width 10
-    // second column is product name, width 12
-    // third column is due date, width 10
-    // fourth column is quantity, width 8
-    fprintf(file, "%-10s%-12s%-12s%-8s\n", "ORDER NUMBER", "PRODUCT", "DUE DATE", "QUANTITY");
+    // first column is order number, width 16
+    // second column is product name, width 11
+    // third column is due date, width 14
+    // fourth column is quantity, width 12
+    fprintf(file, "%16s%11s%14s%12s\n", "ORDER NUMBER", "PRODUCT", "DUE DATE", "QUANTITY");
     fprintf(file, "=====================================================\n");
     for (int i = 0; i < orderNum; i++)
     {
@@ -1055,7 +937,7 @@ void writeReport(struct Report *report)
         strcat(orderProductName, temp);
         char orderDueDateStr[MAX_DATE_LEN];
         dateToStr(order[i].dueDate, orderDueDateStr);
-        fprintf(file, "%-10s%-12s%-12s%-15d\n", order[i].order_number, orderProductName, orderDueDateStr, order[i].order_quantity);
+        fprintf(file, "%16s%11s%14s%12d\n", order[i].order_number, orderProductName, orderDueDateStr, order[i].order_quantity);
     }
     fprintf(file, "- End -\n\n");
     fprintf(file, "=====================================================\n");
@@ -1068,59 +950,42 @@ void writeReport(struct Report *report)
     // the data are right aligned with width 10
     fprintf(file, "       %-35s%10d days\n", "Number of days in use:", report->X[0]);
     fprintf(file, "       %-35s%10d (in total)\n", "Number of products produced:", report->X[1]);
-    fprintf(file, "       %-35s%10.2f %%\n", "Utilization of the plant:", (double)report->X[1] / (totalDays * 300) * 100);
+    fprintf(file, "       %-35s%10.2f %%\n", "Utilization of the plant:", (double)report->X[1] / (totalDays * 300.0) * 100);
     fprintf(file, "\n");
     // then print the performance of plant y
     fprintf(file, "Plant_Y\n");
     fprintf(file, "       %-35s%10d days\n", "Number of days in use:", report->Y[0]);
     fprintf(file, "       %-35s%10d (in total)\n", "Number of products produced:", report->Y[1]);
-    fprintf(file, "       %-35s%10.2f %%\n", "Utilization of the plant:", (double)report->Y[1] / (totalDays * 400) * 100);
+    fprintf(file, "       %-35s%10.2f %%\n", "Utilization of the plant:", (double)report->Y[1] / (totalDays * 400.0) * 100);
     fprintf(file, "\n");
     // finally print the performance of plant z
     fprintf(file, "Plant_Z\n");
     fprintf(file, "       %-35s%10d days\n", "Number of days in use:", report->Z[0]);
     fprintf(file, "       %-35s%10d (in total)\n", "Number of products produced:", report->Z[1]);
-    fprintf(file, "       %-35s%10.2f %%\n", "Utilization of the plant:", (double)report->Z[1] / (totalDays * 500) * 100);
+    fprintf(file, "       %-35s%10.2f %%\n", "Utilization of the plant:", (double)report->Z[1] / (totalDays * 500.0) * 100);
     fprintf(file, "\n");
     // overall performance
-    fprintf(file, "%-42s%10.2f %%\n", "Overall of utilization:", (double)(report->X[1] + report->Y[1] + report->Z[1]) / (totalDays * 1200) * 100);
+    fprintf(file, "%-42s%10.2f %%\n", "Overall of utilization:", (double)(report->X[1] + report->Y[1] + report->Z[1]) / (totalDays * 1200.0) * 100);
     // fprintf(file, "Overall of utilization: %.2f %%\n", (double)(report->X[1] + report->Y[1] + report->Z[1]) / (totalDays * 1200) * 100);
     fclose(file);
 }
 
-void invokeScheduler(const char *str)
-{
-    if (startsWith(str, "FCFS"))
-    {
-        puts("run with FCFS algorithm");
-        invoke(str);
+
+void init(){
+    //clear the content of the file for invalid inputs
+    FILE *filePtr;
+    // Open the file in append mode
+    filePtr = fopen(INVALID_INPUTS, "w");
+    if (filePtr == NULL) {
+        perror("Error opening file");
+        return;
     }
-    else if (startsWith(str, "SJF"))
-    {
-        puts("run with SJF algorithm");
-        invoke(str);
-    }
-    else if (startsWith(str, "PR"))
-    {
-        puts("run with PR algorithm");
-        invoke(str);
-    }
-    else if (startsWith(str, "NOVEL"))
-    {
-        puts("run with NOVEL algorithm");
-        invoke(str);
-    }
-    else
-    {
-        fprintf(stderr, "Error: Invalid algorithm name.\n");
-        exit(1);
-    }
-}
-void invoke(const char *str)
-{
+    // Close the file
+    fclose(filePtr);
 }
 int main()
 {
+    init();
     inputModule();
     return 0;
 }
