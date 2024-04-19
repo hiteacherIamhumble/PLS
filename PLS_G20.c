@@ -608,9 +608,9 @@ void work(const char *algorithm, const char *filename)
                 // record the allocation for current order
                 report[m].allocation[id].order_id = id;
                 report[m].allocation[id].accepted = 1;
-                report[m].allocation[id].schedule[0][0] = currentX + 1;
-                report[m].allocation[id].schedule[1][0] = currentY + 1;
-                report[m].allocation[id].schedule[2][0] = currentZ + 1;
+                report[m].allocation[id].schedule[0][0] = currentX;
+                report[m].allocation[id].schedule[1][0] = currentY;
+                report[m].allocation[id].schedule[2][0] = currentZ;
                 report[m].allocation[id].schedule[0][1] = alloc[0];
                 report[m].allocation[id].schedule[1][1] = alloc[1];
                 report[m].allocation[id].schedule[2][1] = alloc[2];
@@ -651,15 +651,15 @@ void work(const char *algorithm, const char *filename)
                     case 0: // no internal fragmentation
                         break;
                     case 1: // internal fragmentation exists in X
-                        schedule[m].schedule_X[1][currentX] = 300 - remain;
+                        schedule[m].schedule_X[1][currentX - 1] = 300 - remain;
                         report[m].allocation[id].schedule[0][2] -= remain;
                         break;
                     case 2:
-                        schedule[m].schedule_Y[1][currentY] = 400 - remain;
+                        schedule[m].schedule_Y[1][currentY - 1] = 400 - remain;
                         report[m].allocation[id].schedule[1][2] -= remain;
                         break;
                     case 3:
-                        schedule[m].schedule_Z[1][currentZ] = 500 - remain;
+                        schedule[m].schedule_Z[1][currentZ - 1] = 500 - remain;
                         report[m].allocation[id].schedule[2][2] -= remain;
                         break;
                     default:
