@@ -515,6 +515,67 @@ In conclusion, our performance analysis has revealed actionable knowledge for th
 \bibliographystyle{plain}
 \bibliography{ref}
 
+\section{\textbf{Innovative Scheduling Algorithm: NOVEL}}
+\textbf{Since the FCFS and SJF Scheduling algorithms mainly take consideration on the arrival sequence and quantity number rather than the overall utilization of the three plants, which is the only judgement on PLS task, our group aims to design an innovative algorithm to reach better utilization. The design details, considerations and analysis are discussed in this section.}
+\subsection{\textbf{Analysis on brute-force algorithm}}
+\textbf{It is not difficult to find brute-force algorithm always generate the schedule with best utilization by comparing each possible schedules. However, it is not recommended for its time complexity and naïve idea without innovation. Even though some improvements could be made during comparation, the time complexity still requires O(2n * 3n * n!) for n orders in the worst case. In addition, because of its lack of analysis on the real problems, this scheduling suffers from its lack of creativity. Therefore, we recommend an algorithm using greedy idea and a series of improvements out of real needs.}
+\subsection{\textbf{Reanalysis on PLS task}}
+\textbf{Before going into details of our algorithm, a deeper look onto the PLS task is recommended, where you could discover the design considerations. 
+For one, we regard a schedule as two components that is fragment and production, based on the states of the three plants idle and active. Therefore, to improve the overall utilization given by a specific period only needs to decrease the number of fragments. Take a closer look into the fragments, we divided them into two types: internal fragments and external fragments. Internal fragments refer to the idle state of a plant for one day, which is cause by the assigned production quantity is less than the capacity of the plant of one day. While the external fragments mean the whole idle state of one day with respect to a factory, which is caused by rejected orders could not be finished by that plant before order due date. In our design, we aim to lower both internal fragments and external fragments.
+For another, we focus on the numerator and denominator of the utilization formula. The denominator of utilization is unchanged when comparing different algorithms based on the same order set and production period. While the numerator is indeed the total sum of accepted orders. In this point of view, utilization improvement under same input (orders and period) is nothing but accept as many as possible orders.}
+\subsection{\textbf{Design and Implementation Details}}
+\textbf{On the one hand, fragmentations are decreased by using a combination of greedy and brute-force idea. More precisely, we design a macro scheduler aiming to lower external fragments and a micro scheduler which makes sure reach the least internal fragments. After given all the orders, the macro scheduler will sort the orders again in a descending quantity order then do the same thing as FCFS. This is reasonable to decrease external fragmentations because we believe the utilization of assigning some relatively large orders then filled with smaller orders is better than assigning relatively small orders but leave large orders rejected. Though this assumption may make mistakes under specific order batch, we design a performance test over randomly generated order quantity and due date, which proves this scheduling outperforms than FCFS and SJF. In addition, the macro scheduler decides the decline of orders, which is that the scheduler will exam if the current waiting order could be finished by three plants before its due days. We won’t reject orders if they could be done without reserving space for the coming orders because we want to make sure every order assignment will perform best under current condition. This is also the drawback of the greedy idea that couldn’t promise the optimal scheduling. After deciding the accepted order, the macro scheduler will ask the micro scheduler to decide how to allocate on three plants. At last, the macro scheduler will update the plant states based on the micro scheduler and move to the next order.
+On the other hand, the micro scheduler is given the remaining days of X, Y, Z plants before due date and total quantity the order requires. The micro scheduler will use brute-force design to compare all the distribution and decide the optimal one with least internal fragmentations. Then the allocation details will be sent back to the macro scheduler. At this point, the external and internal fragmentations is reduced in an optimized way.
+Last but not least, as we try to accept as many as orders as we could, we redesign the enumerate sequence and comparation conditions inside the micro scheduler and make sure if there are multiple schedule of the same least internal fragmentations, the final allocation will first use the plant X to remaining plant Z with larger daily capacity for accommodating more future orders. The pseudocode of the macro and micro scheduler is shown below for efficient understanding.}
+
+\begin{algorithm}
+\renewcommand{\thealgorithm}{1} % This sets the algorithm number
+\caption{Macro Scheduler of NOVEL} % Caption for the algorithm
+\begin{algorithmic}[1] % The [1] option enables line numbering
+    \State \textbf{reorder} the orders in a descending quantity order
+    \For{\textbf{each} order in order\_set}
+        \State Calculate the remain days of X, Y, Z plants before due
+        \State Calculate the capacity
+        \If{\(capacity < Q\)}
+            \State reject the order
+            \State \textbf{break}
+        \EndIf
+        \State \(\textbf{micro\_scheduler}(X\_rem, Y\_rem, Z\_rem, Q)\)
+        \State update the X, Y, Z plants states
+    \EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Micro Scheduler Function}
+\begin{algorithmic}[1] % Enables line numbering
+\Function{micro\_scheduler}{$X\_rem, Y\_rem, Z\_rem, Q$}
+    \State $vac \gets Q$
+    \State $x \gets 0$
+    \State $y \gets 0$
+    \State $z \gets 0$
+    \For{$i \gets 0$ \textbf{to} $\lfloor Q/300 \rfloor$}
+        \For{$j \gets 0$ \textbf{to} $\lfloor Q/400 \rfloor$}
+            \For{$k \gets 0$ \textbf{to} $\lfloor Q/500 \rfloor$}
+                \State $rem \gets Q - 300 \cdot i - 400 \cdot j - 500 \cdot k$
+                \If{$rem \geq 0$ \textbf{and} $rem \leq vac$}
+                    \State $x \gets i$
+                    \State $y \gets j$
+                    \State $z \gets k$
+                    \State $vac \gets rem$
+                \EndIf
+            \EndFor
+        \EndFor
+    \EndFor
+    \State \Return $\{x, y, z, vac\}$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{\textbf{Deficiency and Improvements}}
+\textbf{Since greedy algorithm is applied, the NOVEL algorithm cannot promise to produce the optimal schedule, or even worse, produce the schedule worse than FCFS or SJF. Therefore, a checking mechanism is introduced in macro scheduler, which will compare the schedule with other two scheduling algorithms before sending back to other modules in pipe(). The final schedule with the best overall utilization will be sent back to enhance performance. The performance experiments in Section eight provides a more straightforward optimization on NOVEL algorithm over the other two scheduling.
+}
+
 \section{\textbf{Appendix}}
 
 \subsection{Source Code}
@@ -527,19 +588,5 @@ In conclusion, our performance analysis has revealed actionable knowledge for th
 \includegraphics[width=0.6\columnwidth]{Figures/1.jpg}
 \caption{This is the output on the terminal of FCFS algorithm.}
 \label{fig:FCFS}
-\end{figure}
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.6\columnwidth]{Figures/2.jpg}
-\caption{This is the output on the terminal of SJF algorithm.}
-\label{fig:SJF}
-\end{figure}
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.6\columnwidth]{Figures/3.jpg}
-\caption{This is the output on the terminal of NOVEL algorithm.}
-\label{fig:NOVEL}
 \end{figure}
 \end{document}
