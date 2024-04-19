@@ -1,0 +1,72 @@
+***PLS Schedule Analysis Report***
+
+Algorithm used: FCFS
+
+There are 10 Orders ACCEPTED. Details are as follows:
+
+    ORDER NUMBER         START           END    DAYS    QUANTITY    PLANT
+=====================================================================
+           P0021    2024-06-02    2024-06-02       1         217  Plant_X
+           P0021    2024-06-02    2024-06-02       1         400  Plant_Y
+           P0021    2024-06-02    2024-06-02       1         500  Plant_Z
+           P0022    2024-06-03    2024-06-05       3         807  Plant_X
+           P0022    2024-06-03    2024-06-04       2         800  Plant_Y
+           P0022    2024-06-03    2024-06-05       3        1500  Plant_Z
+           P0023    2024-06-06    2024-06-11       6        1733  Plant_X
+           P0023    2024-06-06    2024-06-07       2        1000  Plant_Z
+           P0024    2024-06-12    2024-06-12       1         222  Plant_X
+           P0024    2024-06-05    2024-06-11       7        2800  Plant_Y
+           P0024    2024-06-08    2024-06-08       1         500  Plant_Z
+           P0027    2024-06-12    2024-06-12       1         358  Plant_Y
+           P0027    2024-06-09    2024-06-10       2        1000  Plant_Z
+           P0028    2024-06-13    2024-06-16       4        1165  Plant_X
+           P0028    2024-06-13    2024-06-13       1         400  Plant_Y
+           P0029    2024-06-17    2024-06-23       7        2008  Plant_X
+           P0029    2024-06-14    2024-06-14       1         400  Plant_Y
+           P0029    2024-06-11    2024-06-11       1         500  Plant_Z
+           P0030    2024-06-15    2024-06-16       2         757  Plant_Y
+           P0030    2024-06-12    2024-06-14       3        1500  Plant_Z
+           P0033    2024-06-24    2024-06-24       1         241  Plant_X
+           P0033    2024-06-17    2024-06-24       8        3200  Plant_Y
+           P0036    2024-06-15    2024-06-19       5        2327  Plant_Z
+- End -
+
+=====================================================================
+
+
+There are 9 Orders REJECTED. Details are as follows:
+
+    ORDER NUMBER    PRODUCT      DUE DATE    QUANTITY
+=====================================================
+           P0025  Product_D    2024-06-11        3071
+           P0026  Product_E    2024-06-07        3426
+           P0031  Product_B    2024-06-04        2604
+           P0034  Product_E    2024-06-18        3980
+           P0035  Product_B    2024-06-14        1046
+           P0037  Product_D    2024-06-09        3836
+           P0038  Product_B    2024-06-15        2692
+           P0039  Product_B    2024-06-22        3633
+           P0040  Product_C    2024-06-18        3088
+- End -
+
+=====================================================
+
+
+***PERFORMANCE
+
+Plant_X
+       Number of days in use:                     24 days
+       Number of products produced:             6393 (in total)
+       Utilization of the plant:               85.24 %
+
+Plant_Y
+       Number of days in use:                     24 days
+       Number of products produced:             9115 (in total)
+       Utilization of the plant:               91.15 %
+
+Plant_Z
+       Number of days in use:                     19 days
+       Number of products produced:             8827 (in total)
+       Utilization of the plant:               70.62 %
+
+Overall of utilization:                        81.12 %

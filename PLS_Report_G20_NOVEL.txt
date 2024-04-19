@@ -1,0 +1,69 @@
+***PLS Schedule Analysis Report***
+
+Algorithm used: NOVEL
+
+There are 8 Orders ACCEPTED. Details are as follows:
+
+    ORDER NUMBER         START           END    DAYS    QUANTITY    PLANT
+=====================================================================
+           P0028    2024-06-23    2024-06-25       3        1065  Plant_Y
+           P0028    2024-06-18    2024-06-18       1         500  Plant_Z
+           P0029    2024-06-25    2024-06-25       1         208  Plant_X
+           P0029    2024-06-19    2024-06-21       3        1200  Plant_Y
+           P0029    2024-06-11    2024-06-13       3        1500  Plant_Z
+           P0033    2024-06-23    2024-06-24       2         541  Plant_X
+           P0033    2024-06-09    2024-06-14       6        2400  Plant_Y
+           P0033    2024-06-07    2024-06-07       1         500  Plant_Z
+           P0034    2024-06-02    2024-06-13      12        3580  Plant_X
+           P0034    2024-06-02    2024-06-02       1         400  Plant_Y
+           P0036    2024-06-22    2024-06-22       1         327  Plant_Y
+           P0036    2024-06-14    2024-06-17       4        2000  Plant_Z
+           P0037    2024-06-03    2024-06-08       6        2336  Plant_Y
+           P0037    2024-06-02    2024-06-04       3        1500  Plant_Z
+           P0039    2024-06-14    2024-06-22       9        2633  Plant_X
+           P0039    2024-06-05    2024-06-06       2        1000  Plant_Z
+           P0040    2024-06-15    2024-06-18       4        1588  Plant_Y
+           P0040    2024-06-08    2024-06-10       3        1500  Plant_Z
+- End -
+
+=====================================================================
+
+
+There are 11 Orders REJECTED. Details are as follows:
+
+    ORDER NUMBER    PRODUCT      DUE DATE    QUANTITY
+=====================================================
+           P0021  Product_E    2024-06-03        1117
+           P0022  Product_E    2024-06-05        3107
+           P0023  Product_C    2024-06-12        2733
+           P0024  Product_D    2024-06-12        3522
+           P0025  Product_D    2024-06-11        3071
+           P0026  Product_E    2024-06-07        3426
+           P0027  Product_E    2024-06-12        1358
+           P0030  Product_E    2024-06-17        2257
+           P0031  Product_B    2024-06-04        2604
+           P0035  Product_B    2024-06-14        1046
+           P0038  Product_B    2024-06-15        2692
+- End -
+
+=====================================================
+
+
+***PERFORMANCE
+
+Plant_X
+       Number of days in use:                     25 days
+       Number of products produced:             6962 (in total)
+       Utilization of the plant:               92.83 %
+
+Plant_Y
+       Number of days in use:                     25 days
+       Number of products produced:             9316 (in total)
+       Utilization of the plant:               93.16 %
+
+Plant_Z
+       Number of days in use:                     18 days
+       Number of products produced:             8500 (in total)
+       Utilization of the plant:               68.00 %
+
+Overall of utilization:                        82.59 %

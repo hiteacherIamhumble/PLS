@@ -1,8 +1,0 @@
-***PLS Schedule Analysis Report***
-
-Algorithm used: FCFS
-
-There are 0 Orders ACCEPTED. Details are as follows:
-
-    ORDER NUMBER         START           END    DAYS    QUANTITY    PLANT
-=====================================================================
