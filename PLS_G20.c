@@ -82,13 +82,13 @@ struct Scheduler
 
 void promptEnter();
 int startsWith(const char *str, const char *prefix);
-const struct tm str2Date(const char *str);
+//const struct tm str2Date(const char *str);
 void addPeriod(const char *str);
 int addOrder(const char *str);
 void addBatch(const char *str);
 void runPLS(const char *str);
 void exitPLS();
-void work(const char *algorithm, const char *filename);
+void work(const char *algorithm);
 void parseInput(const char *str);
 void inputModule();
 int dateDiff(const struct tm *startDate, const struct tm *endDate);
@@ -157,7 +157,7 @@ int startsWith(const char *str, const char *prefix)
 //     sscanf(str, "%d-%d-%d", &res.year, &res.month, &res.day);
 //     return res;
 // }
-const struct tm str2Date(const char *str)
+struct tm str2Date(const char *str)
 {
     int year, month, day;
     sscanf(str, "%d-%d-%d", &year, &month, &day);
@@ -278,6 +278,20 @@ int addOrder(const char *str)
         appendToInvalidFile(str);
         return 1;
     }
+    //quantity of product must be a positive integer
+    if (order[orderNum].order_quantity <= 0)
+    {
+        printf("Invalid quantity of product.\n");
+        appendToInvalidFile(str);
+        return 1;
+    }
+    //the order type should only be one of the 9 letters: A, B, C, D, E, F, G, H, I 
+    if (order[orderNum].product_name < 'A' || order[orderNum].product_name > 'I')
+    {
+        printf("Invalid product name.\n");
+        appendToInvalidFile(str);
+        return 1;
+    }
     struct tm orderDueDate = str2Date(dueDateStr);
     int n = CheckDueDate(orderDueDate);
     if ( n == 0 ){
@@ -321,7 +335,7 @@ void runPLS(const char *str)
 {
     sscanf(str, "runPLS %s | printREPORT > %s", algorithmName, reportFileName);
     //printf("use algorithm %s, report file to %s\n", algorithmName, reportFileName);
-    work(algorithmName, reportFileName);
+    work(algorithmName);
 }
 void exitPLS()
 {
@@ -485,7 +499,7 @@ void printSchedule(struct Schedule schedule){
     printf("=====================================================================================================\n");
     printf("\n");
 }
-void work(const char *algorithm, const char *filename)
+void work(const char *algorithm)
 {
     struct Scheduler scheduler;
     if (pipe(scheduler.fdp2c) < 0 || pipe(scheduler.fdc2p) < 0)
