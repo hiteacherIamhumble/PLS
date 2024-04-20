@@ -24,7 +24,7 @@ struct Period
 };
 // struct Period currentPeriod = {{0, 0, 0}, {0, 0, 0}};addPERIOD 2024-05-01 2024-06-25
 
-#define MAX_ORDERNUMBER_LEN 10
+#define MAX_ORDERNUMBER_LEN 6
 struct Order
 {
     int order_id;                           // arrival sequence(internal use)
@@ -33,7 +33,7 @@ struct Order
     int order_quantity;                     // quantity of product
     struct tm dueDate;                      // due date
 };
-#define MAX_ORDER_NUM 200
+#define MAX_ORDER_NUM 500
 int orderNum = 0;
 struct Order order[MAX_ORDER_NUM];
 
@@ -93,10 +93,12 @@ void parseInput(const char *str);
 void inputModule();
 int dateDiff(const struct tm *startDate, const struct tm *endDate);
 void writeReport(struct Report *report);
+void appendToInvalidFile(const char *str);
+
 
 int kernel(int Q, int Rx, int Ry, int Rz, int alloc[3]) {
     
-    int delta = Q;
+    int delta = 1000000;
 
     for (int i = 0; i <= Rx; ++i) {
         for (int j = 0; j <= Ry; ++j) {
@@ -107,11 +109,13 @@ int kernel(int Q, int Rx, int Ry, int Rz, int alloc[3]) {
                     alloc[1] = j;
                     alloc[2] = k;
                     delta = remain;
+                    // printf("delta is %d\n", delta);
+                    // printf("alloc[0] is %d\n, alloc[1] is %d\n, alloc[2] is %d\n", alloc[0], alloc[1], alloc[2]);
                 }
             }
         }
     }
-
+    
     int re = alloc[0] * 300 + alloc[1] * 400 + alloc[2] * 500 - Q;
     //find which plant where the vacancy from
     if (re == 0) {
@@ -170,6 +174,10 @@ int dateDiff(const struct tm *startDate, const struct tm *endDate)
     time_t end = mktime((struct tm *)endDate);
     if (start == -1 || end == -1)
     {
+        //print the date
+        printf("start date is %d-%d-%d\n", startDate->tm_year, startDate->tm_mon, startDate->tm_mday);
+        printf("end date is %d-%d-%d\n", endDate->tm_year, endDate->tm_mon, endDate->tm_mday);
+        printf("error: cannot convert date to time_t\n");
         perror("mktime");
         exit(1);
     }
@@ -184,6 +192,32 @@ int dateDiff(const struct tm *startDate, const struct tm *endDate)
 //     // printf("result is %s\n", res);
 //     return res;
 // }
+int isValidDate(const char *dateStr) {
+    int year, month, day;
+    struct tm timeStruct = {0};
+    // Parse the date string
+    if (sscanf(dateStr, "%d-%d-%d", &year, &month, &day) != 3)
+        return 0; // Incorrect format
+
+    // Set up the time structure
+    timeStruct.tm_year = year - 1900; // tm_year is years since 1900
+    timeStruct.tm_mon = month - 1;    // tm_mon is 0-11
+    timeStruct.tm_mday = day;
+    timeStruct.tm_isdst = -1;         // Not dealing with daylight saving
+
+    // Normalize and check the date
+    time_t rawtime = mktime(&timeStruct);
+    if (rawtime == -1)
+        return 0; // Invalid date
+
+    // Check if the normalized date matches the input date
+    if (timeStruct.tm_year + 1900 != year ||
+        timeStruct.tm_mon + 1 != month ||
+        timeStruct.tm_mday != day)
+        return 0; // Normalization changed the date, thus it was invalid
+
+    return 1; // The date is valid
+}
 void addPeriod(const char *str)
 {
     // str is a addPERIOD command.
@@ -192,6 +226,11 @@ void addPeriod(const char *str)
     sscanf(str, "addPERIOD %s %s", startDateStr, endDateStr);
     // printf("start date is %s\n", startDateStr);
     // printf("end date is %s\n", endDateStr);
+    if (isValidDate(startDateStr) == 0 || isValidDate(endDateStr) == 0){
+        perror("input date invalid.");
+        appendToInvalidFile(str);
+        return;
+    }
     startDate = str2Date(startDateStr);
     endDate = str2Date(endDateStr);
     // printf("start date is %d-%d-%d\n", startDate.year, startDate.month, startDate.day);
@@ -234,6 +273,11 @@ int addOrder(const char *str)
     // str is a addORDER command.
     char dueDateStr[MAX_DATE_LEN];
     sscanf(str, "addORDER %s %s %d Product_%c", order[orderNum].order_number, dueDateStr, &order[orderNum].order_quantity, &order[orderNum].product_name);
+    if(isValidDate(dueDateStr) == 0){
+        printf("Invalid due date.\n");
+        appendToInvalidFile(str);
+        return 1;
+    }
     struct tm orderDueDate = str2Date(dueDateStr);
     int n = CheckDueDate(orderDueDate);
     if ( n == 0 ){
@@ -576,11 +620,18 @@ void work(const char *algorithm, const char *filename)
             for (int i = 0; i < orderNum; i++)
             {
                 int id = order[m][i].order_id;
+                // printf("order id is %d\n", id);
+                // printf("due date is %d-%d-%d\n", order[m][i].dueDate.tm_year, order[m][i].dueDate.tm_mon, order[m][i].dueDate.tm_mday);
                 X_remain = dateDiff(&period.startDate, &order[m][i].dueDate) - currentX;
                 Y_remain = dateDiff(&period.startDate, &order[m][i].dueDate) - currentY;
                 Z_remain = dateDiff(&period.startDate, &order[m][i].dueDate) - currentZ;
                 // Acceptance Judge
                 // deney the order if the three plants cannot produce the product before its due date
+                X_remain = 0 > X_remain ? 0 : X_remain;
+                Y_remain = 0 > Y_remain ? 0 : Y_remain;
+                Z_remain = 0 > Z_remain ? 0 : Z_remain;
+                // printf("order quantity is %d\n", order[m][i].order_quantity);
+                // printf("X_remain is %d\n, Y_remain is %d\n, Z_remain is %d\n", X_remain, Y_remain, Z_remain);
                 if (300 * X_remain + 400 * Y_remain + 500 * Z_remain < order[m][id].order_quantity)
                 {
                     // deney the order
@@ -588,9 +639,6 @@ void work(const char *algorithm, const char *filename)
                     report[m].allocation[id].accepted = 0;
                     continue;
                 }
-                X_remain = 0 > X_remain ? 0 : X_remain;
-                Y_remain = 0 > Y_remain ? 0 : Y_remain;
-                Z_remain = 0 > Z_remain ? 0 : Z_remain;
                 // Allocation Calculation
                 int alloc[3] = {0, 0, 0}; // days to assign to X, Y, Z
                 //int vacancy = allocate(order[i].order_quantity, X_remain, Y_remain, Z_remain, alloc); // which plant has internal fragmentation
@@ -600,8 +648,10 @@ void work(const char *algorithm, const char *filename)
                 
                 if (vacancy == -1)
                 {
-                    printf("error: invalid vacancy\n");
-                    exit(1);
+                    // deney the order
+                    report[m].allocation[id].order_id = id;
+                    report[m].allocation[id].accepted = 0;
+                    continue;
                 }
 
                 // Report Generation
@@ -792,7 +842,7 @@ void work(const char *algorithm, const char *filename)
         }
         // read report from scheduler
         struct Report report;
-        // initlaize report
+        // initialize report
         for (int i = 0; i < MAX_ORDER_NUM; i++)
         {
             report.allocation[i].order_id = -1;
